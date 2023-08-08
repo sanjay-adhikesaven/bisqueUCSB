@@ -26,6 +26,7 @@ sys.path.append(os.path.join(ROOT_DIR, "source/"))
 results_outdir = 'source/UNet_Outputs/'
 import nph_prediction
 
+
 class ScriptError(Exception):
     def __init__(self, message):
         self.message = "Script error: %s" % message
@@ -52,39 +53,38 @@ class PythonScriptWrapper(object):
         log.info("predictor_UNIQUE: %s" % (predictor_uniq))
         predictor_url = bq.service_url('image_service', path=predictor_uniq)
         log.info("predictor_URL: %s" % (predictor_url))
-        predictor_path = os.path.join(kw.get('stagingPath', 'source/Scans'), self.getstrtime()+'-'+image.name + '.nii')
-        
+        predictor_path = os.path.join(kw.get('stagingPath', 'source/Scans'),
+                                      self.getstrtime() + '-' + image.name + '.nii')
+
         predictor_path = bq.fetchblob(predictor_url, path=predictor_path)
         log.info("predictor_path: %s" % (predictor_path))
-        #predictor_path = fetchImage(bq, predictor_url, dest=predictor_path, uselocalpath=True)
-        #predictor_path = bq.fetch(url=predictor_url, path=predictor_path)
+        # predictor_path = fetchImage(bq, predictor_url, dest=predictor_path, uselocalpath=True)
+        # predictor_path = bq.fetch(url=predictor_url, path=predictor_path)
         reducer_uniq = self.options.reducer_url.split('/')[-1]
         reducer_url = bq.service_url('blob_service', path=reducer_uniq)
         reducer_path = os.path.join(kw.get('stagingPath', 'source/'), 'unet_model.pt')
         reducer_path = bq.fetchblob(reducer_url, path=reducer_path)
 
-        
         self.nifti_file = os.path.join(
             self.options.stagingPath, NIFTI_IMAGE_PATH, image.name)
         log.info("process image as %s" % (self.nifti_file))
         log.info("image meta: %s" % (image))
-        #ip = image.pixels().format('nii.gz').fetch() 
-        #log.info("BRUHHHHHH IP: %s" % (type(ip)))
-        #ip2 = image.pixels() #.format('nii')
-        #log.info("BRUHHHHHH IP2: %s" % (type(ip2)))
-        #log.info("BRUHHHHHH Value: %s" % (image.value))
-        #img_nib = nib.load(ip)
+        # ip = image.pixels().format('nii.gz').fetch()
+        # log.info("BRUHHHHHH IP: %s" % (type(ip)))
+        # ip2 = image.pixels() #.format('nii')
+        # log.info("BRUHHHHHH IP2: %s" % (type(ip2)))
+        # log.info("BRUHHHHHH Value: %s" % (image.value))
+        # img_nib = nib.load(ip)
         meta = image.pixels().meta().fetch()
-        #meta = ET.XML(meta)
+        # meta = ET.XML(meta)
         meta = bq.factory.string2etree(meta)
-        
-        #with open(self.nifti_file, 'wb') as f:
+
+        # with open(self.nifti_file, 'wb') as f:
         #    f.write(ip2.fetch())
         log.info('Executing Histogram match')
         pred = nph_prediction.main()
         log.info('Completed Histogram match')
         return pred
-
 
     def getstrtime(self):
         # format timestamp
@@ -102,7 +102,7 @@ class PythonScriptWrapper(object):
         log.info('Up Mex: %s' % (mex_id))
         log.info('Up File: %s' % (filename))
         resource = etree.Element(
-            'image', name='ModuleExecutions/nphprediction/'+filename)
+            'image', name='ModuleExecutions/nphprediction/' + filename)
         t = etree.SubElement(resource, 'tag', name="datetime", value=self.getstrtime())
         log.info('Creating upload xml data: %s ' %
                  str(etree.tostring(resource, pretty_print=True)))
@@ -132,7 +132,7 @@ class PythonScriptWrapper(object):
         log.info('Up Mex: %s' % (mex_id))
         log.info('Up File: %s' % (filename))
         resource = etree.Element(
-            'table', name='ModuleExecutions/nphprediction/'+filename)
+            'table', name='ModuleExecutions/nphprediction/' + filename)
         t = etree.SubElement(resource, 'tag', name="datetime", value=self.getstrtime())
         log.info('Creating upload xml data: %s ' %
                  str(etree.tostring(resource, pretty_print=True)))
@@ -172,7 +172,7 @@ class PythonScriptWrapper(object):
             self.outfiles = []
             for files in os.listdir(results_outdir):
                 if files.endswith("1.nii.gz"):
-                    self.outfiles.append(results_outdir+files)
+                    self.outfiles.append(results_outdir + files)
             bq.update_mex('Uploading Mask result')
             self.resimage = self.uploadimgservice(bq, self.outfiles)
             bq.update_mex('Uploading Table result')
@@ -201,7 +201,7 @@ class PythonScriptWrapper(object):
         volsConv = pd.read_csv('source/volumes_conv_unet.csv')
         preds = pd.read_csv('source/predictions.csv')
         # outputs = predict( bq, log, **self.options.__dict__ )
-        #outtable_xml = table_service.store_array(maxMisorient, name='maxMisorientData')
+        # outtable_xml = table_service.store_array(maxMisorient, name='maxMisorientData')
         out_xml = """<tag name="Metadata">
 		<tag name="Scan" type="string" value="%s"/>
 		<tag name="Ventricle" type="string" value="%s"/>
@@ -210,7 +210,9 @@ class PythonScriptWrapper(object):
 		<tag name="Volumes Table" type="resource" value="%s"/>
         <tag name="Volumes Converted Table" type="resource" value="%s"/>
 		<tag name="Prediction" type="string" value="%s"/>
-                    </tag>""" % (str(vols.Scan[0]), str(vols.Vent[0]), str(vols.Sub[0]), str(vols.White[0]), self.voltable.get('value'), self.volconvtable.get('value'), str(preds.columns[-1]))
+                    </tag>""" % (
+        str(vols.Scan[0]), str(vols.Vent[0]), str(vols.Sub[0]), str(vols.White[0]), self.voltable.get('value'),
+        self.volconvtable.get('value'), str(preds.columns[-1]))
         outputs = [out_imgxml, out_xml]
         log.debug(outputs)
         # save output back to BisQue
@@ -245,10 +247,10 @@ class PythonScriptWrapper(object):
             # append reference to output
             if res_type in ['table', 'image']:
                 outputTag.append(r_xml)
-                #etree.SubElement(outputTag, 'tag', name='output_table' if res_type=='table' else 'output_image', type=res_type, value=r_xml.get('uri',''))
+                # etree.SubElement(outputTag, 'tag', name='output_table' if res_type=='table' else 'output_image', type=res_type, value=r_xml.get('uri',''))
             else:
                 outputTag.append(r_xml)
-                #etree.SubElement(outputTag, r_xml.tag, name=r_xml.get('name', '_'), type=r_xml.get('type', 'string'), value=r_xml.get('value', ''))
+                # etree.SubElement(outputTag, r_xml.tag, name=r_xml.get('name', '_'), type=r_xml.get('type', 'string'), value=r_xml.get('value', ''))
         log.debug('Output Mex results: %s' %
                   (etree.tostring(outputTag, pretty_print=True)))
         self.bqSession.finish_mex(tags=[outputTag])
@@ -415,7 +417,7 @@ class PythonScriptWrapper(object):
             output_etree_Element = self.upload_service(bq, resource_path, data_type=resource_type)
             # log.info(f"***** Uploaded output {resource_type} '{resource_name}' to {output_etree_Element.get('value')}")
             log.info("***** Uploaded output %s '%s' to %s" % (
-            resource_type, resource_name, output_etree_Element.get('value')))
+                resource_type, resource_name, output_etree_Element.get('value')))
 
             # Set the value attribute of the each resource's tag to its corresponding resource uri
             resource.set('value', output_etree_Element.get('value'))
