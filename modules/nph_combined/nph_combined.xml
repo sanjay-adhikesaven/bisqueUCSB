@@ -32,7 +32,17 @@
             <template>
                 <tag name="label" value="Segmentation image" />
             </template>
-    </tag>  
+    </tag>
+    <tag name="NonImage">
+
+           <template>
+
+                <tag name="label" value="Outputs"/>
+
+                <tag name="Output Metric" type="table"/>
+           </template>
+
+      </tag>
 	<tag name="Metadata">
             <template>
                 <tag name="label" value="Metadata" />

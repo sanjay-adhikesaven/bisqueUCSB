@@ -67,6 +67,11 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 	torchvision==0.4.0 \
 	nipype==1.8.2 \
 	bqapi-ucsb \
+    lxml \
+    requests=2.18.4 \
+    requests-toolbelt \
+    tifffile \
+    xmltodict \
         && \
     $PIP3_INSTALL -i https://biodev.ece.ucsb.edu/py/bisque/prod/+simple \
         requests==2.18.4 \

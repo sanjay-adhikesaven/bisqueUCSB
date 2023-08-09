@@ -162,6 +162,9 @@ class PythonScriptWrapper(object):
         Run Python script
         """
         bq = self.bqSession
+        log.info('***** self.options: %s' % (self.options))
+        inputs_dir_path = os.getcwd()
+        outputs_dir_path = os.getcwd()
         # table_service = bq.service ('table')
         # call scripts
         try:
@@ -189,6 +192,34 @@ class PythonScriptWrapper(object):
         except (Exception, ScriptError) as e:
             log.exception("Exception during upload result")
             bq.fail_mex(msg="Exception during upload result: %s" % str(e))
+            return
+
+        try:
+            bq.update_mex('Fetching inputs specified in xml')
+            input_path_dict = self.fetch_input_resources(bq, inputs_dir_path)
+        except (Exception, ScriptError) as e:
+            log.exception("***** Exception while fetching inputs specified in xml")
+            bq.fail_mex(msg="Exception while fetching inputs specified in xml: %s" % str(e))
+            return
+
+        try:
+            bq.update_mex('Running module')
+            log.info("input_path_dict log");
+            log.info(input_path_dict)
+            print("input_path_dict print");
+            print(input_path_dict)
+            self.output_data_path_dict = run_module(input_path_dict, outputs_dir_path)
+        except (Exception, ScriptError) as e:
+            log.exception("***** Exception while running module from BQ_run_module")
+            bq.fail_mex(msg="Exception while running module from BQ_run_module: %s" % str(e))
+            return
+
+        try:
+            bq.update_mex('Uploading results to Bisque')
+            self.output_resources = self.upload_results(bq)
+        except (Exception, ScriptError) as e:
+            log.exception("***** Exception while uploading results to Bisque")
+            bq.fail_mex(msg="Exception while uploading results to Bisque: %s" % str(e))
             return
 
         log.info('Completed the workflow: %s' % (self.resimage.get('value')))
