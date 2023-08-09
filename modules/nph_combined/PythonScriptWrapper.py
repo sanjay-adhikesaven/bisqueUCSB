@@ -9,8 +9,13 @@ from lxml import etree
 import optparse
 import logging
 from bqapi.util import *
+from bqapi.comm import BQSession
+from bqapi.util import fetch_blob
+from source.BQ_run_module import run_module
 import nibabel as nib
 import pandas as pd
+from source import nph_prediction
+import xml.etree.ElementTree as ET
 
 logging.basicConfig(filename='PythonScript.log',
                     filemode='a', level=logging.DEBUG)
@@ -24,7 +29,6 @@ ROOT_DIR = './'
 NIFTI_IMAGE_PATH = 'source/Scans/'
 sys.path.append(os.path.join(ROOT_DIR, "source/"))
 results_outdir = 'source/UNet_Outputs/'
-import nph_prediction
 
 
 class ScriptError(Exception):
@@ -219,12 +223,11 @@ class PythonScriptWrapper(object):
         for output in outputs:
             self.output_resources.append(output)
 
+    """ 
     def setup(self):
-        """
         Pre-run initialization
-        """
         self.output_resources.append(output)
-
+    """
     def setup(self):
         """
         Pre-run initialization
