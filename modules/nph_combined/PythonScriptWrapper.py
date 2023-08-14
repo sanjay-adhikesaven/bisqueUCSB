@@ -163,8 +163,6 @@ class PythonScriptWrapper(object):
         """
         bq = self.bqSession
         log.info('***** self.options: %s' % (self.options))
-        inputs_dir_path = os.getcwd()
-        outputs_dir_path = os.getcwd()
         # table_service = bq.service ('table')
         # call scripts
         try:
@@ -194,14 +192,8 @@ class PythonScriptWrapper(object):
             bq.fail_mex(msg="Exception during upload result: %s" % str(e))
             return
 
-        try:
-            bq.update_mex('Fetching inputs specified in xml')
-            input_path_dict = self.fetch_input_resources(bq, inputs_dir_path)
-        except (Exception, ScriptError) as e:
-            log.exception("***** Exception while fetching inputs specified in xml")
-            bq.fail_mex(msg="Exception while fetching inputs specified in xml: %s" % str(e))
-            return
-
+        input_path_dict = results_outdir
+        outputs_dir_path = os.getcwd()
         try:
             bq.update_mex('Running module')
             log.info("input_path_dict log");
