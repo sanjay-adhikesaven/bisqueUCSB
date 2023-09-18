@@ -193,6 +193,8 @@ class PythonScriptWrapper(object):
             return
 
         input_path_dict = results_outdir
+        log.info(input_path_dict)
+        print(input_path_dict)
         outputs_dir_path = os.getcwd()
         try:
             bq.update_mex('Running module')
